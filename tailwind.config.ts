@@ -18,12 +18,30 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				inter: ['Inter', 'sans-serif'],
+				lora: ['Lora', 'serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				navy: {
+					DEFAULT: 'hsl(var(--navy))',
+					light: 'hsl(var(--navy-light))'
+				},
+				red: {
+					accent: 'hsl(var(--red-accent))'
+				},
+				gold: {
+					accent: 'hsl(var(--gold-accent))',
+					light: 'hsl(var(--gold-light))'
+				},
+				verified: 'hsl(var(--verified))',
+				'under-verification': 'hsl(var(--under-verification))',
+				unverified: 'hsl(var(--unverified))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -69,6 +87,24 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
+				'scroll-left': {
+					from: {
+						transform: 'translateX(100%)'
+					},
+					to: {
+						transform: 'translateX(-100%)'
+					}
+				},
+				'fade-in': {
+					from: {
+						opacity: '0',
+						transform: 'translateY(20px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -87,6 +123,8 @@ export default {
 				}
 			},
 			animation: {
+				'scroll-left': 'scroll-left 60s linear infinite',
+				'fade-in': 'fade-in 0.6s ease-out',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
