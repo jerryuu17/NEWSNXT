@@ -41,7 +41,7 @@ const Header = () => {
             <div className="flex h-8 w-8 items-center justify-center bg-gradient-to-r from-red-accent to-gold-accent rounded font-bold text-white text-sm">
               N
             </div>
-            <span className="headline-font text-xl font-bold text-navy">NEWSnst</span>
+            <span className="headline-font text-xl font-bold text-navy">NEWSnxt</span>
           </div>
 
           {/* Desktop Navigation */}

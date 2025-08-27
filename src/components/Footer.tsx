@@ -43,7 +43,7 @@ const Footer = () => {
               <div className="flex h-10 w-10 items-center justify-center bg-gradient-to-r from-red-accent to-gold-accent rounded font-bold text-white">
                 N
               </div>
-              <span className="headline-font text-2xl font-bold">NEWSnst</span>
+              <span className="headline-font text-2xl font-bold">NEWSnxt</span>
             </div>
             <p className="body-font text-gray-300 mb-6 max-w-md">
               Your trusted source for verified, crowdsourced, and multilingual news. 
@@ -123,7 +123,7 @@ const Footer = () => {
           </div>
           
           <p className="body-font text-gray-400 text-sm text-center md:text-right">
-            © 2025 NEWSnst. All Rights Reserved.<br />
+            © 2025 NEWSnxt. All Rights Reserved.<br />
             Designed for trusted, crowdsourced, multilingual news.
           </p>
         </div>
