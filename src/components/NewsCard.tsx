@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { CheckCircle, AlertTriangle, Clock, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -131,37 +131,35 @@ const NewsCard = ({
         </div>
       )}
       
-      <CardContent className="flex flex-col h-full p-0">
-        {/* Main Content */}
-        <div className="p-4 pb-2 flex-grow">
-          <div className="flex items-center justify-between mb-3">
-            <Badge variant="secondary" className="text-xs font-medium bg-primary text-primary-foreground">
-              {category}
-            </Badge>
-            {getVerificationBadge()}
-          </div>
-
-          <h3 className="headline-font font-semibold text-lg mb-2 line-clamp-3 text-foreground leading-tight">
-            {title}
-          </h3>
-
-          <p className="body-font text-muted-foreground text-sm mb-3 line-clamp-3">
-            {description}
-          </p>
-
-          {/* Source and Date Info */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-            <span className="font-medium">
-              Source: {isCrowdsourced ? `${sourceName} (Crowdsourced)` : sourceName}
-            </span>
-            <span>{publishedAt}</span>
-          </div>
+      <CardContent className="p-4 pb-0">
+        <div className="flex items-center justify-between mb-3">
+          <Badge variant="secondary" className="text-xs font-medium bg-primary text-primary-foreground">
+            {category}
+          </Badge>
+          {getVerificationBadge()}
         </div>
 
-        {/* Interactive Section */}
-        <div className="border-t bg-muted/20 p-3 mt-auto">
-          {/* Reaction Buttons */}
-          <div className="flex flex-wrap items-center gap-1 mb-3">
+        <h3 className="headline-font font-semibold text-lg mb-2 line-clamp-3 text-foreground leading-tight">
+          {title}
+        </h3>
+
+        <p className="body-font text-muted-foreground text-sm mb-4 line-clamp-3">
+          {description}
+        </p>
+      </CardContent>
+
+      <CardFooter className="flex flex-col gap-3 border-t bg-muted/20 p-3">
+        {/* Source and Date */}
+        <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
+          <span className="font-medium">
+            Source: {isCrowdsourced ? `${sourceName} (Crowdsourced)` : sourceName}
+          </span>
+          <span>{publishedAt}</span>
+        </div>
+
+        {/* Reactions, Comments, Share */}
+        <div className="w-full flex items-center justify-between">
+          <div className="flex flex-wrap items-center gap-1">
             {Object.entries(reactionEmojis).map(([type, emoji]) => (
               <button
                 key={type}
@@ -171,55 +169,58 @@ const NewsCard = ({
                     ? 'bg-primary/10 text-primary border-primary/20 shadow-sm' 
                     : 'bg-background text-muted-foreground hover:text-foreground hover:bg-accent border-border hover:border-accent'
                 }`}
+                aria-label={`React ${type}`}
               >
-                <span className="text-base transition-transform duration-200 hover:scale-110">{emoji}</span>
+                <span className="text-base leading-none">{emoji}</span>
                 <span className="font-medium">{reactions[type as keyof typeof reactions]}</span>
               </button>
             ))}
           </div>
 
-          {/* Comments and Share */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200 hover:scale-105"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+              aria-label="Toggle comments"
             >
               <MessageCircle className="h-4 w-4" />
-              <span className="font-medium">{commentsCount} Comments</span>
+              <span className="font-medium">{commentsCount}</span>
             </button>
-            
+
             <button 
               onClick={handleShare}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200 hover:scale-105"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+              aria-label="Share this story"
             >
               <Share2 className="h-4 w-4" />
               <span className="font-medium">Share</span>
             </button>
           </div>
-
-          {/* Comments Section */}
-          {showComments && (
-            <div className="bg-background rounded-lg p-3 mb-3 border animate-fade-in">
-              <div className="text-sm text-muted-foreground mb-3">Join the conversation</div>
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Add a comment..." 
-                  className="flex-1 text-sm px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                />
-                <Button size="sm" className="px-4">Post</Button>
-              </div>
-            </div>
-          )}
-
-          <Button 
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
-            size="sm"
-          >
-            Read More
-          </Button>
         </div>
-      </CardContent>
+
+        <Button 
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
+          size="sm"
+        >
+          Read More
+        </Button>
+      </CardFooter>
+
+      {showComments && (
+        <div className="px-3 pb-3">
+          <div className="bg-background rounded-lg p-3 border animate-fade-in">
+            <div className="text-sm text-muted-foreground mb-3">Join the conversation</div>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Add a comment..." 
+                className="flex-1 text-sm px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              />
+              <Button size="sm" className="px-4">Post</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
