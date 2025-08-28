@@ -120,100 +120,100 @@ const NewsCard = ({
   };
 
   return (
-    <Card className="news-card h-full overflow-hidden">
+    <Card className="news-card group h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
       {image && (
         <div className="aspect-video overflow-hidden">
           <img 
             src={image} 
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
       )}
       
-      <CardContent className="p-4 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-3">
-          <Badge variant="secondary" className="text-xs font-medium bg-navy text-white">
-            {category}
-          </Badge>
-          {getVerificationBadge()}
-        </div>
-
-        <h3 className="headline-font font-semibold text-lg mb-2 line-clamp-3 text-navy leading-tight">
-          {title}
-        </h3>
-
-        <p className="body-font text-muted-foreground text-sm mb-4 line-clamp-3 flex-grow">
-          {description}
-        </p>
-
-        <div className="mt-auto">
-          {/* Source and Date Info */}
+      <CardContent className="flex flex-col h-full p-0">
+        {/* Main Content */}
+        <div className="p-4 pb-2 flex-grow">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-muted-foreground">
-              <span className="font-medium">
-                Source: {isCrowdsourced ? `${sourceName} (Crowdsourced)` : sourceName}
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {publishedAt}
-            </div>
+            <Badge variant="secondary" className="text-xs font-medium bg-primary text-primary-foreground">
+              {category}
+            </Badge>
+            {getVerificationBadge()}
           </div>
 
+          <h3 className="headline-font font-semibold text-lg mb-2 line-clamp-3 text-foreground leading-tight">
+            {title}
+          </h3>
+
+          <p className="body-font text-muted-foreground text-sm mb-3 line-clamp-3">
+            {description}
+          </p>
+
+          {/* Source and Date Info */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+            <span className="font-medium">
+              Source: {isCrowdsourced ? `${sourceName} (Crowdsourced)` : sourceName}
+            </span>
+            <span>{publishedAt}</span>
+          </div>
+        </div>
+
+        {/* Interactive Section */}
+        <div className="border-t bg-muted/20 p-3 mt-auto">
           {/* Reaction Buttons */}
-          <div className="flex items-center gap-2 mb-3 py-2 border-t border-border">
-            <div className="flex items-center gap-1">
-              {Object.entries(reactionEmojis).map(([type, emoji]) => (
-                <button
-                  key={type}
-                  onClick={() => handleReaction(type)}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors hover:bg-accent ${
-                    userReaction === type ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <span className="text-sm">{emoji}</span>
-                  <span>{reactions[type as keyof typeof reactions]}</span>
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap items-center gap-1 mb-3">
+            {Object.entries(reactionEmojis).map(([type, emoji]) => (
+              <button
+                key={type}
+                onClick={() => handleReaction(type)}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs transition-all duration-200 hover:scale-105 border ${
+                  userReaction === type 
+                    ? 'bg-primary/10 text-primary border-primary/20 shadow-sm' 
+                    : 'bg-background text-muted-foreground hover:text-foreground hover:bg-accent border-border hover:border-accent'
+                }`}
+              >
+                <span className="text-base transition-transform duration-200 hover:scale-110">{emoji}</span>
+                <span className="font-medium">{reactions[type as keyof typeof reactions]}</span>
+              </button>
+            ))}
           </div>
 
           {/* Comments and Share */}
           <div className="flex items-center justify-between mb-3">
             <button 
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200 hover:scale-105"
             >
-              <MessageCircle className="h-3 w-3" />
-              <span>{commentsCount} Comments</span>
+              <MessageCircle className="h-4 w-4" />
+              <span className="font-medium">{commentsCount} Comments</span>
             </button>
             
             <button 
               onClick={handleShare}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200 hover:scale-105"
             >
-              <Share2 className="h-3 w-3" />
-              <span>Share</span>
+              <Share2 className="h-4 w-4" />
+              <span className="font-medium">Share</span>
             </button>
           </div>
 
           {/* Comments Section */}
           {showComments && (
-            <div className="bg-muted/50 rounded-md p-3 mb-3">
-              <div className="text-xs text-muted-foreground mb-2">Comments coming soon...</div>
+            <div className="bg-background rounded-lg p-3 mb-3 border animate-fade-in">
+              <div className="text-sm text-muted-foreground mb-3">Join the conversation</div>
               <div className="flex gap-2">
                 <input 
                   type="text" 
                   placeholder="Add a comment..." 
-                  className="flex-1 text-xs px-2 py-1 rounded border border-input bg-background"
+                  className="flex-1 text-sm px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                 />
-                <Button size="sm" className="text-xs h-6">Post</Button>
+                <Button size="sm" className="px-4">Post</Button>
               </div>
             </div>
           )}
 
           <Button 
-            className="w-full bg-navy hover:bg-navy-light text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
             size="sm"
           >
             Read More
