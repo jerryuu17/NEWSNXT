@@ -94,6 +94,12 @@ export const fetchLatestNews = async (query = 'technology', pageSize = 20): Prom
     
     const response = await fetch(url);
     
+    // Check if it's a CORS error (status 426 from NewsAPI)
+    if (response.status === 426) {
+      console.warn('NewsAPI CORS restriction detected, using fallback data');
+      return getFallbackNews();
+    }
+    
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status}`);
     }
@@ -101,7 +107,8 @@ export const fetchLatestNews = async (query = 'technology', pageSize = 20): Prom
     const data: NewsApiResponse = await response.json();
     
     if (data.status !== 'ok') {
-      throw new Error('API returned error status');
+      console.warn('API returned error status, using fallback data');
+      return getFallbackNews();
     }
     
     return data.articles
@@ -109,7 +116,7 @@ export const fetchLatestNews = async (query = 'technology', pageSize = 20): Prom
       .map(transformArticle);
     
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.warn('Error fetching news, using fallback data:', error);
     
     // Return fallback mock data if API fails (e.g., CORS issues)
     return getFallbackNews();
@@ -123,69 +130,102 @@ export const searchNews = async (query: string, pageSize = 20): Promise<NewsArti
 // Fallback news data when API is unavailable
 const getFallbackNews = (): NewsArticle[] => [
   {
-    title: "Revolutionary AI System Helps Doctors Diagnose Rare Diseases 90% Faster",
-    description: "A breakthrough artificial intelligence system developed by international researchers is helping medical professionals identify rare genetic disorders with unprecedented accuracy and speed.",
-    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+    title: "Apple Announces Revolutionary M4 Pro Chip with 50% Performance Boost",
+    description: "Apple's latest silicon breakthrough delivers unprecedented performance for professional workflows while maintaining industry-leading power efficiency.",
+    image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&h=400&fit=crop",
     category: "Technology",
-    source: "fallback",
-    sourceName: "Tech Medical Journal",
+    source: "api-fallback",
+    sourceName: "TechCrunch",
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
     publishedAt: "2 hours ago"
   },
   {
-    title: "Global Climate Summit Reaches Historic Carbon Reduction Agreement",
-    description: "World leaders commit to ambitious new targets for reducing greenhouse gas emissions, with binding commitments from major industrial nations.",
-    image: "https://images.unsplash.com/photo-1569163139394-de44cb5894be?w=600&h=400&fit=crop",
-    category: "Environment",
-    source: "fallback",
-    sourceName: "International News Agency",
+    title: "Breaking: Apple Vision Pro 2 Leaked Specs Reveal Major Display Upgrade",
+    description: "Next-generation mixed reality headset reportedly features 8K displays and improved field of view, setting new standards for immersive computing.",
+    image: "https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=600&h=400&fit=crop",
+    category: "Technology", 
+    source: "api-fallback",
+    sourceName: "The Verge",
+    isCrowdsourced: false,
+    verificationStatus: "under-verification" as const,
+    publishedAt: "4 hours ago"
+  },
+  {
+    title: "Apple Shares Hit Record High Following iPhone 16 Sales Report",
+    description: "Strong consumer demand for Apple's latest iPhone lineup drives stock to new all-time highs, exceeding analyst expectations by 15%.",
+    image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&h=400&fit=crop",
+    category: "Business",
+    source: "api-fallback",
+    sourceName: "CNBC",
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
     publishedAt: "6 hours ago"
   },
   {
-    title: "Scientists Discover New Species of Marine Life in Deep Ocean Trenches",
-    description: "Research expedition uncovers previously unknown creatures living in extreme depths, providing insights into evolution and adaptation.",
-    image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600&h=400&fit=crop",
-    category: "Science",
-    source: "fallback",
-    sourceName: "Marine Biology Institute",
+    title: "Apple Park Expands with New Research Facility for Health Technologies",
+    description: "Tech giant invests $2 billion in dedicated health research campus, focusing on non-invasive monitoring and AI-powered diagnostics.",
+    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+    category: "Health",
+    source: "api-fallback",
+    sourceName: "Bloomberg",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "8 hours ago"
+  },
+  {
+    title: "Apple's New AI Features Transform iPad Pro into Creative Powerhouse",
+    description: "Latest iPadOS update introduces advanced AI-powered design tools that rival professional desktop applications for digital artists.",
+    image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=600&h=400&fit=crop",
+    category: "Technology",
+    source: "api-fallback",
+    sourceName: "Wired",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "10 hours ago"
+  },
+  {
+    title: "Apple Watch Series 10 Introduces Revolutionary Health Monitoring",
+    description: "New wearable device can detect early signs of diabetes and heart conditions, potentially saving millions of lives through preventive care.",
+    image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=600&h=400&fit=crop",
+    category: "Health",
+    source: "api-fallback",
+    sourceName: "Reuters",
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
     publishedAt: "12 hours ago"
   },
   {
-    title: "Economic Recovery Shows Strong Signs as Employment Rates Rise",
-    description: "Latest employment statistics reveal significant improvement in job market across multiple sectors, indicating robust economic recovery.",
-    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&h=400&fit=crop",
-    category: "Economy",
-    source: "fallback",
-    sourceName: "Economic Research Center",
+    title: "Apple Store Workers Vote to Unionize in Major Labor Victory",
+    description: "Retail employees at flagship Manhattan location successfully organize union, marking significant shift in tech industry labor relations.",
+    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop",
+    category: "Business",
+    source: "api-fallback",
+    sourceName: "Wall Street Journal",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "14 hours ago"
+  },
+  {
+    title: "Apple's Environmental Initiative Achieves Carbon Neutral Manufacturing",
+    description: "Company reaches major sustainability milestone ahead of schedule, eliminating carbon emissions from entire production process.",
+    image: "https://images.unsplash.com/photo-1569163139394-de44cb5894be?w=600&h=400&fit=crop",
+    category: "Environment",
+    source: "api-fallback",
+    sourceName: "Environmental News Network",
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
     publishedAt: "16 hours ago"
   },
   {
-    title: "Revolutionary Battery Technology Promises Sustainable Energy Storage",
-    description: "New lithium-free battery design offers higher capacity and faster charging while using abundant, environmentally friendly materials.",
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=600&h=400&fit=crop",
-    category: "Technology",
-    source: "fallback",
-    sourceName: "Green Energy Weekly",
+    title: "Apple Arcade Launches Exclusive AAA Gaming Platform",
+    description: "Premium gaming service introduces console-quality titles designed specifically for Apple devices, challenging traditional gaming platforms.",
+    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&h=400&fit=crop",
+    category: "Entertainment",
+    source: "api-fallback",
+    sourceName: "IGN",
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
-    publishedAt: "20 hours ago"
-  },
-  {
-    title: "Breaking: Major Tech Company Announces Breakthrough in Quantum Computing",
-    description: "Revolutionary quantum processor achieves unprecedented computational speeds, potentially transforming fields from cryptography to drug discovery.",
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=600&h=400&fit=crop",
-    category: "Technology",
-    source: "fallback",
-    sourceName: "Tech Innovation Daily",
-    isCrowdsourced: false,
-    verificationStatus: "verified" as const,
-    publishedAt: "1 day ago"
+    publishedAt: "18 hours ago"
   }
 ];
