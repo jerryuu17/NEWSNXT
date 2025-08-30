@@ -120,7 +120,7 @@ const NewsCard = ({
   };
 
   return (
-    <Card className="news-card group h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="news-card group h-full overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col">
       {image && (
         <div className="aspect-video overflow-hidden">
           <img 
@@ -131,7 +131,7 @@ const NewsCard = ({
         </div>
       )}
       
-      <CardContent className="p-4 pb-0">
+      <CardContent className="p-4 pb-0 flex-grow flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <Badge variant="secondary" className="text-xs font-medium bg-primary text-primary-foreground">
             {category}
@@ -143,12 +143,12 @@ const NewsCard = ({
           {title}
         </h3>
 
-        <p className="body-font text-muted-foreground text-sm mb-4 line-clamp-3">
+        <p className="body-font text-muted-foreground text-sm mb-4 line-clamp-3 flex-grow">
           {description}
         </p>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3 border-t bg-muted/20 p-3">
+      <CardFooter className="flex flex-col gap-3 border-t bg-card p-3 mt-auto">
         {/* Source and Date */}
         <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
           <span className="font-medium">
