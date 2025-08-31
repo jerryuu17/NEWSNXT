@@ -87,17 +87,23 @@ const transformArticle = (article: NewsApiArticle): NewsArticle => ({
   publishedAt: formatPublishedDate(article.publishedAt)
 });
 
-export const fetchLatestNews = async (query = 'technology', pageSize = 20): Promise<NewsArticle[]> => {
+export const fetchLatestNews = async (query = 'technology', pageSize = 20, page = 1): Promise<NewsArticle[]> => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const url = `${BASE_URL}/everything?q=${encodeURIComponent(query)}&from=${today}&sortBy=popularity&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    // Random queries for more diverse content
+    const randomQueries = ['breaking news', 'latest', 'world news', 'technology', 'business', 'health', 'sports', 'entertainment'];
+    const randomQuery = Math.random() > 0.5 ? query : randomQueries[Math.floor(Math.random() * randomQueries.length)];
+    
+    const url = `${BASE_URL}/everything?q=${encodeURIComponent(randomQuery)}&from=${yesterday}&to=${today}&sortBy=publishedAt&pageSize=${pageSize}&page=${page}&apiKey=${NEWS_API_KEY}`;
     
     const response = await fetch(url);
     
     // Check if it's a CORS error (status 426 from NewsAPI)
     if (response.status === 426) {
       console.warn('NewsAPI CORS restriction detected, using fallback data');
-      return getFallbackNews();
+      return getFallbackNews(page);
     }
     
     if (!response.ok) {
@@ -108,27 +114,32 @@ export const fetchLatestNews = async (query = 'technology', pageSize = 20): Prom
     
     if (data.status !== 'ok') {
       console.warn('API returned error status, using fallback data');
-      return getFallbackNews();
+      return getFallbackNews(page);
     }
     
-    return data.articles
+    // Shuffle articles for random display
+    const shuffledArticles = data.articles
       .filter(article => article.title && article.description) // Filter out articles with missing data
+      .sort(() => Math.random() - 0.5)
       .map(transformArticle);
+    
+    return shuffledArticles;
     
   } catch (error) {
     console.warn('Error fetching news, using fallback data:', error);
     
     // Return fallback mock data if API fails (e.g., CORS issues)
-    return getFallbackNews();
+    return getFallbackNews(page);
   }
 };
 
-export const searchNews = async (query: string, pageSize = 20): Promise<NewsArticle[]> => {
-  return fetchLatestNews(query, pageSize);
+export const searchNews = async (query: string, pageSize = 20, page = 1): Promise<NewsArticle[]> => {
+  return fetchLatestNews(query, pageSize, page);
 };
 
 // Fallback news data when API is unavailable
-const getFallbackNews = (): NewsArticle[] => [
+const getFallbackNews = (page = 1): NewsArticle[] => {
+  const baseNews = [
   {
     title: "Apple Announces Revolutionary M4 Pro Chip with 50% Performance Boost",
     description: "Apple's latest silicon breakthrough delivers unprecedented performance for professional workflows while maintaining industry-leading power efficiency.",
@@ -227,5 +238,56 @@ const getFallbackNews = (): NewsArticle[] => [
     isCrowdsourced: false,
     verificationStatus: "verified" as const,
     publishedAt: "18 hours ago"
+  },
+  {
+    title: "Global Tech Summit 2025 Announces Revolutionary AI Breakthroughs",
+    description: "Leading technology companies unveil next-generation AI solutions that promise to transform industries from healthcare to education.",
+    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop",
+    category: "Technology",
+    source: "api-fallback",
+    sourceName: "Tech Today",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "20 hours ago"
+  },
+  {
+    title: "Climate Change Summit Reaches Historic Agreement on Carbon Reduction",
+    description: "World leaders commit to unprecedented measures to combat climate change, with binding targets for carbon neutrality by 2030.",
+    image: "https://images.unsplash.com/photo-1569163139394-de44cb5894be?w=600&h=400&fit=crop",
+    category: "Environment",
+    source: "api-fallback",
+    sourceName: "Environmental Times",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "22 hours ago"
+  },
+  {
+    title: "Breakthrough Medical Research Shows Promise for Cancer Treatment",
+    description: "New immunotherapy approach demonstrates 90% success rate in clinical trials, offering hope for advanced cancer patients.",
+    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+    category: "Health",
+    source: "api-fallback",
+    sourceName: "Medical Journal",
+    isCrowdsourced: false,
+    verificationStatus: "verified" as const,
+    publishedAt: "1 day ago"
   }
-];
+  ];
+
+  // Generate more articles for pagination by cycling through and modifying base news
+  const articlesPerPage = 20;
+  const startIndex = (page - 1) * articlesPerPage;
+  const result = [];
+  
+  for (let i = 0; i < articlesPerPage; i++) {
+    const baseArticle = baseNews[i % baseNews.length];
+    result.push({
+      ...baseArticle,
+      title: `[Page ${page}] ${baseArticle.title}`,
+      publishedAt: `${Math.floor(Math.random() * 24) + 1} hours ago`,
+      image: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000)}?w=600&h=400&fit=crop&auto=format`
+    });
+  }
+  
+  return result;
+};

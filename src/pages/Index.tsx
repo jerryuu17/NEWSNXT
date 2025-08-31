@@ -12,7 +12,9 @@ const Index = () => {
   const [visibleNews, setVisibleNews] = useState(6);
   const [newsData, setNewsData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch news data on component mount
   useEffect(() => {
@@ -20,7 +22,7 @@ const Index = () => {
       try {
         setLoading(true);
         setError(null);
-        const articles = await fetchLatestNews('technology', 20);
+        const articles = await fetchLatestNews('technology', 20, 1);
         setNewsData(articles);
       } catch (err) {
         setError('Failed to load news articles');
@@ -32,8 +34,20 @@ const Index = () => {
 
     loadNews();
   }, []);
-  const loadMoreNews = () => {
-    setVisibleNews(prev => Math.min(prev + 3, newsData.length));
+
+  const loadMoreNews = async () => {
+    try {
+      setLoadingMore(true);
+      const nextPage = currentPage + 1;
+      const newArticles = await fetchLatestNews('technology', 20, nextPage);
+      setNewsData(prev => [...prev, ...newArticles]);
+      setCurrentPage(nextPage);
+      setVisibleNews(prev => prev + 6);
+    } catch (err) {
+      console.error('Error loading more news:', err);
+    } finally {
+      setLoadingMore(false);
+    }
   };
   return <div className="min-h-screen bg-background">
       <Header />
@@ -125,11 +139,19 @@ const Index = () => {
               </div>
             )}
 
-            {visibleNews < newsData.length && <div className="text-center mt-8">
-                <Button onClick={loadMoreNews} variant="outline" size="lg" className="px-8 py-3 border-navy text-navy hover:bg-navy hover:text-white">
-                  Load More Stories
+            {!loading && !error && (
+              <div className="text-center mt-8">
+                <Button 
+                  onClick={loadMoreNews} 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-8 py-3 border-navy text-navy hover:bg-navy hover:text-white"
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading...' : 'Load More Stories'}
                 </Button>
-              </div>}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
