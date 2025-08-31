@@ -74,10 +74,16 @@ const formatPublishedDate = (dateString: string): string => {
   return publishedDate.toLocaleDateString();
 };
 
+// Function to clean content by removing [pageN] references
+const cleanContent = (content: string): string => {
+  if (!content) return '';
+  return content.replace(/\[page\d+\]/gi, '').replace(/\[\+?\d+\s*chars?\]/gi, '').trim();
+};
+
 // Transform API response to our NewsArticle format
 const transformArticle = (article: NewsApiArticle): NewsArticle => ({
-  title: article.title || 'Untitled Article',
-  description: article.description || 'No description available.',
+  title: cleanContent(article.title) || 'Untitled Article',
+  description: cleanContent(article.description || '') || 'No description available.',
   image: article.urlToImage || undefined,
   category: categorizeArticle(article.title, article.description || ''),
   source: article.url,
@@ -87,16 +93,23 @@ const transformArticle = (article: NewsApiArticle): NewsArticle => ({
   publishedAt: formatPublishedDate(article.publishedAt)
 });
 
-export const fetchLatestNews = async (query = 'technology', pageSize = 20, page = 1): Promise<NewsArticle[]> => {
+export const fetchLatestNews = async (query = 'latest', pageSize = 20, page = 1): Promise<NewsArticle[]> => {
   try {
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     // Random queries for more diverse content
-    const randomQueries = ['breaking news', 'latest', 'world news', 'technology', 'business', 'health', 'sports', 'entertainment'];
-    const randomQuery = Math.random() > 0.5 ? query : randomQueries[Math.floor(Math.random() * randomQueries.length)];
+    const randomQueries = [
+      'breaking news', 'latest news', 'world news', 'technology', 'business', 
+      'health', 'sports', 'entertainment', 'science', 'politics', 'environment',
+      'economy', 'innovation', 'global', 'trending', 'headlines'
+    ];
     
-    const url = `${BASE_URL}/everything?q=${encodeURIComponent(randomQuery)}&from=${yesterday}&to=${today}&sortBy=publishedAt&pageSize=${pageSize}&page=${page}&apiKey=${NEWS_API_KEY}`;
+    // Use random query for more diverse content, but keep some consistency
+    const useRandomQuery = Math.random() > 0.3; // 70% chance of random query
+    const finalQuery = useRandomQuery ? randomQueries[Math.floor(Math.random() * randomQueries.length)] : query;
+    
+    const url = `${BASE_URL}/everything?q=${encodeURIComponent(finalQuery)}&from=${yesterday}&to=${today}&sortBy=publishedAt&pageSize=${pageSize}&page=${page}&apiKey=${NEWS_API_KEY}`;
     
     const response = await fetch(url);
     
@@ -117,9 +130,17 @@ export const fetchLatestNews = async (query = 'technology', pageSize = 20, page 
       return getFallbackNews(page);
     }
     
-    // Shuffle articles for random display
-    const shuffledArticles = data.articles
-      .filter(article => article.title && article.description) // Filter out articles with missing data
+    // Filter and shuffle articles for random display
+    const validArticles = data.articles
+      .filter(article => 
+        article.title && 
+        article.description && 
+        article.title !== '[Removed]' &&
+        article.description !== '[Removed]'
+      );
+    
+    // Randomize order for each request
+    const shuffledArticles = validArticles
       .sort(() => Math.random() - 0.5)
       .map(transformArticle);
     
@@ -281,13 +302,18 @@ const getFallbackNews = (page = 1): NewsArticle[] => {
   
   for (let i = 0; i < articlesPerPage; i++) {
     const baseArticle = baseNews[i % baseNews.length];
+    const timeVariations = ['minutes', 'hours', 'days'];
+    const timeUnit = timeVariations[Math.floor(Math.random() * timeVariations.length)];
+    const timeValue = Math.floor(Math.random() * (timeUnit === 'minutes' ? 60 : timeUnit === 'hours' ? 24 : 7)) + 1;
+    
     result.push({
       ...baseArticle,
-      title: `[Page ${page}] ${baseArticle.title}`,
-      publishedAt: `${Math.floor(Math.random() * 24) + 1} hours ago`,
-      image: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000)}?w=600&h=400&fit=crop&auto=format`
+      title: baseArticle.title, // Remove the [Page X] prefix
+      publishedAt: `${timeValue} ${timeUnit} ago`,
+      image: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000) + 1500000000}?w=600&h=400&fit=crop&auto=format`
     });
   }
   
-  return result;
+  // Shuffle the result for random order
+  return result.sort(() => Math.random() - 0.5);
 };
