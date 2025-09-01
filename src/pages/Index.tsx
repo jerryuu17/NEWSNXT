@@ -172,9 +172,6 @@ const Index = () => {
                     isCrowdsourced={false} 
                     verificationStatus={"verified"} 
                     publishedAt={timeAgo(news.publishedAt)} 
-                    // 🔑 Open original news in a new tab
-                    readMoreUrl={news.url}
-                    openInNewTab
                   />
                 ))}
               </div>
