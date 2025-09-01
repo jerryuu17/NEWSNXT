@@ -6,84 +6,117 @@ import NewsCard from '@/components/NewsCard';
 import TrendingTopics from '@/components/TrendingTopics';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { fetchLatestNews, type NewsArticle } from '@/services/newsApi';
 import heroImage from '@/assets/news-hero.jpg';
-
-interface NewsArticle {
-  source: {
-    id: string | null;
-    name: string;
-  };
-  author: string | null;
-  title: string;
-  description: string;
-  url: string;
-  urlToImage: string | null;
-  publishedAt: string;
-  content: string;
-}
 
 const Index = () => {
   const [visibleNews, setVisibleNews] = useState(6);
-  const [newsData, setNewsData] = useState<NewsArticle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch news from API
-  useEffect(() => {
-    const loadNews = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await fetch(
-          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=1&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
-        );
-        const data = await response.json();
-
-        // shuffle results for randomness
-        const shuffled = data.articles.sort(() => 0.5 - Math.random());
-        setNewsData(shuffled);
-      } catch (err) {
-        setError('Failed to load news articles');
-        console.error('Error loading news:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadNews();
-  }, []);
-
-  const loadMoreNews = async () => {
-    try {
-      setLoadingMore(true);
-      const nextPage = currentPage + 1;
-
-      const response = await fetch(
-        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
-      );
-      const data = await response.json();
-
-      const shuffled = data.articles.sort(() => 0.5 - Math.random());
-
-      setNewsData(prev => [...prev, ...shuffled]);
-      setCurrentPage(nextPage);
-      setVisibleNews(prev => prev + 6);
-    } catch (err) {
-      console.error('Error loading more news:', err);
-    } finally {
-      setLoadingMore(false);
+  // Mock news data - mix of API and crowdsourced content
+  const newsData = [
+    {
+      title: "Revolutionary AI System Helps Doctors Diagnose Rare Diseases 90% Faster",
+      description: "A breakthrough artificial intelligence system developed by international researchers is helping medical professionals identify rare genetic disorders with unprecedented accuracy and speed.",
+      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+      category: "Technology",
+      source: "api",
+      sourceName: "Tech Medical Journal",
+      isCrowdsourced: false,
+      verificationStatus: "verified" as const,
+      publishedAt: "2 hours ago"
+    },
+    {
+      title: "Local Community Garden Initiative Transforms Urban Neighborhood",
+      description: "Citizens in downtown area successfully convert vacant lot into thriving community space, providing fresh produce and bringing neighbors together.",
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop",
+      category: "Cultural",
+      source: "crowdsourced",
+      sourceName: "Maria Rodriguez",
+      isCrowdsourced: true,
+      verificationStatus: "verified" as const,
+      publishedAt: "4 hours ago"
+    },
+    {
+      title: "Global Climate Summit Reaches Historic Carbon Reduction Agreement",
+      description: "World leaders commit to ambitious new targets for reducing greenhouse gas emissions, with binding commitments from major industrial nations.",
+      image: "https://images.unsplash.com/photo-1569163139394-de44cb5894be?w=600&h=400&fit=crop",
+      category: "International",
+      source: "api",
+      sourceName: "International News Agency",
+      isCrowdsourced: false,
+      verificationStatus: "verified" as const,
+      publishedAt: "6 hours ago"
+    },
+    {
+      title: "New Public Transportation Route Reduces Commute Times by 40%",
+      description: "Recently launched express bus service connecting suburban areas to city center shows remarkable success in first month of operation.",
+      image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop",
+      category: "National",
+      source: "crowdsourced",
+      sourceName: "David Kim",
+      isCrowdsourced: true,
+      verificationStatus: "under-verification" as const,
+      publishedAt: "8 hours ago"
+    },
+    {
+      title: "Scientists Discover New Species of Marine Life in Deep Ocean Trenches",
+      description: "Research expedition uncovers previously unknown creatures living in extreme depths, providing insights into evolution and adaptation.",
+      image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600&h=400&fit=crop",
+      category: "Science",
+      source: "api",
+      sourceName: "Marine Biology Institute",
+      isCrowdsourced: false,
+      verificationStatus: "verified" as const,
+      publishedAt: "12 hours ago"
+    },
+    {
+      title: "Local School's Innovative STEM Program Wins National Recognition",
+      description: "Elementary school's hands-on science curriculum receives prestigious education award, inspiring similar programs nationwide.",
+      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop",
+      category: "Cultural",
+      source: "crowdsourced",
+      sourceName: "Jennifer Thompson",
+      isCrowdsourced: true,
+      verificationStatus: "verified" as const,
+      publishedAt: "14 hours ago"
+    },
+    {
+      title: "Economic Recovery Shows Strong Signs as Employment Rates Rise",
+      description: "Latest employment statistics reveal significant improvement in job market across multiple sectors, indicating robust economic recovery.",
+      image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&h=400&fit=crop",
+      category: "Economy",
+      source: "api",
+      sourceName: "Economic Research Center",
+      isCrowdsourced: false,
+      verificationStatus: "verified" as const,
+      publishedAt: "16 hours ago"
+    },
+    {
+      title: "Community Health Fair Provides Free Medical Screenings to 500 Residents",
+      description: "Volunteer doctors and nurses team up with local organizations to offer essential health services to underserved community members.",
+      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop",
+      category: "Health",
+      source: "crowdsourced",
+      sourceName: "Dr. Sarah Mitchell",
+      isCrowdsourced: true,
+      verificationStatus: "verified" as const,
+      publishedAt: "18 hours ago"
+    },
+    {
+      title: "Revolutionary Battery Technology Promises Sustainable Energy Storage",
+      description: "New lithium-free battery design offers higher capacity and faster charging while using abundant, environmentally friendly materials.",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=600&h=400&fit=crop",
+      category: "Technology",
+      source: "api",
+      sourceName: "Green Energy Weekly",
+      isCrowdsourced: false,
+      verificationStatus: "under-verification" as const,
+      publishedAt: "20 hours ago"
     }
-  };
+  ];
 
-  // helper: how many hours ago
-  const timeAgo = (dateString: string) => {
-    const published = new Date(dateString).getTime();
-    const now = new Date().getTime();
-    const diff = Math.floor((now - published) / (1000 * 60 * 60)); // hours
-    return diff <= 0 ? "Just now" : `${diff}h ago`;
+  const loadMoreNews = () => {
+    setVisibleNews(prev => Math.min(prev + 3, newsData.length));
   };
 
   return (
@@ -136,46 +169,22 @@ const Index = () => {
               </div>
             </div>
 
-            {loading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="bg-card border rounded-lg p-4 animate-pulse">
-                    <div className="aspect-video bg-muted rounded mb-4"></div>
-                    <div className="h-4 bg-muted rounded mb-2"></div>
-                    <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {error && (
-              <div className="text-center py-8">
-                <p className="text-destructive mb-4">{error}</p>
-                <Button onClick={() => window.location.reload()} variant="outline">
-                  Try Again
-                </Button>
-              </div>
-            )}
-
-            {!loading && !error && (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {newsData.slice(0, visibleNews).map((news, index) => (
-                  <NewsCard 
-                    key={`${news.source?.name}-${index}`} 
-                    title={news.title} 
-                    description={news.description} 
-                    image={news.urlToImage || "/newspaper-placeholder.jpg"} 
-                    category={"General"} 
-                    source={news.url} 
-                    sourceName={news.source?.name} 
-                    isCrowdsourced={false} 
-                    verificationStatus={"verified"} 
-                    publishedAt={timeAgo(news.publishedAt)} 
-                  />
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {newsData.slice(0, visibleNews).map((news, index) => (
+                <NewsCard
+                  key={index}
+                  title={news.title}
+                  description={news.description}
+                  image={news.image}
+                  category={news.category}
+                  source={news.source}
+                  sourceName={news.sourceName}
+                  isCrowdsourced={news.isCrowdsourced}
+                  verificationStatus={news.verificationStatus}
+                  publishedAt={news.publishedAt}
+                />
+              ))}
+            </div>
 
             {!loading && !error && (
               <div className="text-center mt-8">
@@ -200,8 +209,6 @@ const Index = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
