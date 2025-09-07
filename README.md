@@ -19,13 +19,20 @@ We also use an **AI/ML model** for verification support and provide multilingual
 
 ## ✨ Features
 
-✅ **Crowd-Sourced Reporting** – Anyone can post local news from their location.                 
+✅ **Crowd-Sourced Reporting** – Anyone can post local news from their location.        
+
 ✅ **Radius-Based Verification** – Users within **5 km** can verify news authenticity.
+
 ✅ **Voting Mechanism** – If votes cross threshold → news is published.
+
 ✅ **Gamification** – Users earn **points & credibility scores** for participation.
+
 ✅ **Integrated News API** – Shows latest headlines from trusted sources.
+
 ✅ **AI/ML Verification** – Machine Learning helps detect fake/misleading news.
+
 ✅ **Multi-Language Support** – News available in **10+ Indian languages**.
+
 ✅ **Responsive UI** – Built with **ReactJS + Vite** for fast and modern experience.
 
 ---
