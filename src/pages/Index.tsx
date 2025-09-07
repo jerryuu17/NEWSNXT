@@ -21,7 +21,6 @@ interface NewsArticle {
   publishedAt: string;
   content: string;
 }
-
 const Index = () => {
   const [visibleNews, setVisibleNews] = useState(6);
   const [newsData, setNewsData] = useState<NewsArticle[]>([]);
@@ -38,7 +37,7 @@ const Index = () => {
         setError(null);
 
         const response = await fetch(
-          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=1&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
+          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${currentPage}&apiKey=${import.meta.env.VITE_NEWS_API_KEY}`
         );
         const data = await response.json();
 
@@ -54,7 +53,7 @@ const Index = () => {
     };
 
     loadNews();
-  }, []);
+  },[currentPage] );
 
   const loadMoreNews = async () => {
     try {
@@ -62,7 +61,7 @@ const Index = () => {
       const nextPage = currentPage + 1;
 
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
+        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=${import.meta.env.VITE_NEWS_API_KEY}`
       );
       const data = await response.json();
 
@@ -173,8 +172,6 @@ const Index = () => {
                     verificationStatus={"verified"} 
                     publishedAt={timeAgo(news.publishedAt)} 
                     // 🔑 Open original news in a new tab
-                    readMoreUrl={news.url}
-                    openInNewTab
                   />
                 ))}
               </div>
