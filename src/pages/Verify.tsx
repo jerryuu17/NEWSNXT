@@ -43,6 +43,7 @@ const Verify = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState<NewsReport[]>([]);
+  const [userVotes, setUserVotes] = useState<Record<string, 'up' | 'down'>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -127,6 +128,27 @@ const Verify = () => {
   };
 
   const handleVote = (reportId: string, voteType: 'up' | 'down') => {
+    // Check if user already voted on this report
+    if (userVotes[reportId]) {
+      toast({
+        title: "Already voted",
+        description: "You have already voted on this report.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check distance restriction
+    const report = reports.find(r => r.id === reportId);
+    if (report && report.distance > 5) {
+      toast({
+        title: "Location restriction",
+        description: "You can only vote on reports within 5km of your location.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setReports(prev => prev.map(report => {
       if (report.id === reportId) {
         return {
@@ -139,6 +161,8 @@ const Verify = () => {
       }
       return report;
     }));
+
+    setUserVotes(prev => ({ ...prev, [reportId]: voteType }));
     
     toast({
       title: "Vote recorded",
@@ -345,11 +369,11 @@ const Verify = () => {
               ) : (
                 <div className="space-y-4">
                   {reports.map((report) => (
-                    <Card key={report.id} className="border-navy/20 hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
+                    <Card key={report.id} className="border-navy/20 hover:shadow-lg transition-all duration-300 hover:border-navy/40">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex flex-wrap items-center gap-2 mb-3">
                               <Badge variant="outline" className="text-xs border-navy/30 text-navy">
                                 {report.category}
                               </Badge>
@@ -357,52 +381,101 @@ const Verify = () => {
                                 {getStatusIcon(report.verificationStatus)}
                                 <span className="capitalize">{report.verificationStatus}</span>
                               </div>
-                              <span className="text-sm text-foreground/70">• {report.distance}km away</span>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${
+                                  report.distance <= 5 
+                                    ? 'border-verified/30 text-verified bg-verified/5' 
+                                    : 'border-orange-500/30 text-orange-600 bg-orange-50 dark:bg-orange-950/20'
+                                }`}
+                              >
+                                {report.distance}km away
+                              </Badge>
+                              <div className="flex items-center gap-1 text-xs text-foreground/60">
+                                <Clock className="w-3 h-3" />
+                                <span>{report.publishedAt}</span>
+                              </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-navy mb-2">{report.headline}</h3>
-                            <p className="text-foreground/80 mb-3">{report.description}</p>
                             
-                            <div className="flex items-center gap-4 text-sm text-foreground/70">
+                            <h3 className="text-lg sm:text-xl font-semibold text-navy mb-2 leading-tight">{report.headline}</h3>
+                            <p className="text-foreground/80 mb-3 line-clamp-3">{report.description}</p>
+                            
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-foreground/70">
                               <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {report.location.address}
+                                <MapPin className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{report.location.address}</span>
                               </span>
-                              <span>By {report.author}</span>
-                              <span>{report.publishedAt}</span>
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                <span>By {report.author}</span>
+                              </span>
+                            </div>
+
+                            {/* Trust Indicators */}
+                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-navy/5">
+                              <div className="flex items-center gap-1 text-xs text-verified">
+                                <Shield className="w-3 h-3" />
+                                <span>Community Score: {Math.round((report.votes.up / Math.max(1, report.votes.up + report.votes.down)) * 100)}%</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-foreground/60">
+                                <Eye className="w-3 h-3" />
+                                <span>{report.votes.up + report.votes.down} votes</span>
+                              </div>
                             </div>
                           </div>
                           
                           {report.image && (
-                            <img 
-                              src={report.image} 
-                              alt={report.headline}
-                              className="w-24 h-24 object-cover rounded-lg ml-4 flex-shrink-0"
-                            />
+                            <div className="w-full lg:w-32 h-24 lg:h-24 flex-shrink-0">
+                              <img 
+                                src={report.image} 
+                                alt={report.headline}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            </div>
                           )}
                         </div>
                         
                         {/* Voting Section */}
                         <div className="flex items-center justify-between pt-4 border-t border-navy/10">
                           <div className="flex items-center gap-4">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleVote(report.id, 'up')}
-                              className="flex items-center gap-2 border-verified text-verified hover:bg-verified hover:text-white"
-                            >
-                              <ThumbsUp className="w-4 h-4" />
-                              Verify ({report.votes.up})
-                            </Button>
-                            
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleVote(report.id, 'down')}
-                              className="flex items-center gap-2 border-destructive text-destructive hover:bg-destructive hover:text-white"
-                            >
-                              <ThumbsDown className="w-4 h-4" />
-                              Dispute ({report.votes.down})
-                            </Button>
+                            {report.distance <= 5 ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant={userVotes[report.id] === 'up' ? 'default' : 'outline'}
+                                  onClick={() => handleVote(report.id, 'up')}
+                                  disabled={!!userVotes[report.id]}
+                                  className={`flex items-center gap-2 ${
+                                    userVotes[report.id] === 'up' 
+                                      ? 'bg-verified text-white' 
+                                      : 'border-verified text-verified hover:bg-verified hover:text-white'
+                                  }`}
+                                >
+                                  <ThumbsUp className="w-4 h-4" />
+                                  Verify ({report.votes.up})
+                                </Button>
+                                
+                                <Button
+                                  size="sm"
+                                  variant={userVotes[report.id] === 'down' ? 'default' : 'outline'}
+                                  onClick={() => handleVote(report.id, 'down')}
+                                  disabled={!!userVotes[report.id]}
+                                  className={`flex items-center gap-2 ${
+                                    userVotes[report.id] === 'down'
+                                      ? 'bg-destructive text-white'
+                                      : 'border-destructive text-destructive hover:bg-destructive hover:text-white'
+                                  }`}
+                                >
+                                  <ThumbsDown className="w-4 h-4" />
+                                  Dispute ({report.votes.down})
+                                </Button>
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-2 text-sm text-foreground/50 bg-muted/50 px-3 py-2 rounded-lg">
+                                <MapPin className="w-4 h-4" />
+                                <span>Too far to verify ({report.distance}km) - Must be within 5km</span>
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-2">
