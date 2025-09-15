@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import BreakingNews from '@/components/BreakingNews';
 import CategoryBar from '@/components/CategoryBar';
@@ -22,6 +23,7 @@ interface NewsArticle {
   content: string;
 }
 const Index = () => {
+  const navigate = useNavigate();
   const [visibleNews, setVisibleNews] = useState(6);
   const [newsData, setNewsData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,10 +107,19 @@ const Index = () => {
             and empowers citizen reporting across multiple languages.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-red-accent hover:bg-red-accent/90 text-white px-8 py-3">
+            <Button 
+              size="lg" 
+              className="bg-red-accent hover:bg-red-accent/90 text-white px-8 py-3"
+              onClick={() => navigate('/report')}
+            >
               Start Reporting
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:text-navy px-8 py-3 font-normal bg-gray-500 hover:bg-gray-400">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-white text-white hover:text-navy px-8 py-3 font-normal bg-gray-500 hover:bg-gray-400"
+              onClick={() => navigate('/stories')}
+            >
               Explore Stories
             </Button>
           </div>
