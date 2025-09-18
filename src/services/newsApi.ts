@@ -1,4 +1,5 @@
-const NEWS_API_KEY = `${process.env.NEWS_API_KEY}`;
+const NEWS_API_KEY = `fd21aaad08ee43ffabf7f68db7c3eaa5
+`;
 const BASE_URL = 'https://newsapi.org/v2';
 
 export interface NewsApiArticle {

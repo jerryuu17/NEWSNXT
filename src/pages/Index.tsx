@@ -39,7 +39,7 @@ const Index = () => {
         setError(null);
 
         const response = await fetch(
-          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${currentPage}&apiKey=${process.env.NEWS_API_KEY}`
+          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${currentPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
         );
         const data = await response.json();
 
@@ -63,7 +63,8 @@ const Index = () => {
       const nextPage = currentPage + 1;
 
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=${process.env.NEWS_API_KEY}`
+        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5
+`
       );
       const data = await response.json();
 
