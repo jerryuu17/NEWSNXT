@@ -10,7 +10,7 @@ export async function handler(event) {
 
     const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(
       query
-    )}&from=${yesterday}&to=${today}&sortBy=publishedAt&pageSize=${pageSize}&page=${page}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`;
+    )}&from=${yesterday}&to=${today}&sortBy=publishedAt&pageSize=${pageSize}&page=${page}&apiKey=${process.env.NEWS_API_KEY}`;
 
     const response = await fetch(url);
     const data = await response.json();
