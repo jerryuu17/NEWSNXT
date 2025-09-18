@@ -42,16 +42,18 @@ const Stories = () => {
       try {
         setLoading(true);
         setError(null);
-        const newsPromises = categories.map(async (category) => {
-          const response = await fetch(
-            `https://newsapi.org/v2/everything?q=${category.query}&from=2025-08-30&sortBy=popularity&language=en&pageSize=12&apiKey=${import.meta.env.VITE_NEWS_API_KEY}`
-          );
-          const data = await response.json();
-          return { [category.id]: data.articles || [] };
+        
+        // Import hardcoded data
+        const { getNewsByCategory } = await import('@/data/mockNews');
+        
+        const categorizedNews: { [key: string]: NewsArticle[] } = {};
+        
+        // Load news for each category
+        categories.forEach((category) => {
+          const categoryNews = getNewsByCategory(category.id, 12);
+          categorizedNews[category.id] = categoryNews.sort(() => 0.5 - Math.random());
         });
 
-        const results = await Promise.all(newsPromises);
-        const categorizedNews = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
         setNewsData(categorizedNews);
       } catch (err) {
         setError('Failed to load news stories');

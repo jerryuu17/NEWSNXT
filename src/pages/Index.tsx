@@ -31,20 +31,24 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch news from API
+  // Load hardcoded news data
   useEffect(() => {
     const loadNews = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-          `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${currentPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5`
-        );
-        const data = await response.json();
-
-        // shuffle results for randomness
-        const shuffled = data.articles.sort(() => 0.5 - Math.random());
+        // Import hardcoded data
+        const { getAllNews } = await import('@/data/mockNews');
+        const allNews = getAllNews();
+        
+        // Calculate start and end indices for pagination
+        const startIndex = (currentPage - 1) * 20;
+        const endIndex = startIndex + 20;
+        
+        // Get paginated results and shuffle them
+        const paginatedNews = allNews.slice(startIndex, endIndex);
+        const shuffled = paginatedNews.sort(() => 0.5 - Math.random());
         setNewsData(shuffled);
       } catch (err) {
         setError('Failed to load news articles');
@@ -55,24 +59,30 @@ const Index = () => {
     };
 
     loadNews();
-  },[currentPage] );
+  }, [currentPage]);
 
   const loadMoreNews = async () => {
     try {
       setLoadingMore(true);
       const nextPage = currentPage + 1;
 
-      const response = await fetch(
-        `https://newsapi.org/v2/everything?q=technology&from=2025-08-30&sortBy=popularity&language=en&pageSize=20&page=${nextPage}&apiKey=fd21aaad08ee43ffabf7f68db7c3eaa5
-`
-      );
-      const data = await response.json();
+      // Import hardcoded data
+      const { getAllNews } = await import('@/data/mockNews');
+      const allNews = getAllNews();
+      
+      // Calculate start and end indices for pagination
+      const startIndex = (nextPage - 1) * 20;
+      const endIndex = startIndex + 20;
+      
+      // Get next page of results
+      const nextPageNews = allNews.slice(startIndex, endIndex);
+      const shuffled = nextPageNews.sort(() => 0.5 - Math.random());
 
-      const shuffled = data.articles.sort(() => 0.5 - Math.random());
-
-      setNewsData(prev => [...prev, ...shuffled]);
-      setCurrentPage(nextPage);
-      setVisibleNews(prev => prev + 6);
+      if (shuffled.length > 0) {
+        setNewsData(prev => [...prev, ...shuffled]);
+        setCurrentPage(nextPage);
+        setVisibleNews(prev => prev + 6);
+      }
     } catch (err) {
       console.error('Error loading more news:', err);
     } finally {
