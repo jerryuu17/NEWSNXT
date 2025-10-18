@@ -189,5 +189,5 @@ This project is licensed under the **MIT License**.
 
 ## 👨‍💻 Authors
 
-* **Kshitij Sinha** – Developer of NEWSnxt
+* **Kshitij Sinha, Shubham, Saurav Kankerwal** – Developer of NEWSnxt
 * Contributions are welcome!
